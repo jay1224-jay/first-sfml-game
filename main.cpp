@@ -35,7 +35,9 @@ int main() {
     sf::Sound hit_sound;
     hit_sound.setBuffer(hit_sound_buf);
 
+
     bool jump_flag = false;
+    bool hit_sound_play_flag = false;
 
 
 
@@ -82,9 +84,17 @@ int main() {
         bullet.move(-2.f, 0.f);
 
         if ( collision_detect(bullet, player) ) {
-            hit_sound.play();
+            if ( !hit_sound_play_flag )
+                hit_sound_play_flag = true;
             player.setOutlineColor(sf::Color::Blue);
         } 
+
+        if ( hit_sound_play_flag ) {
+            if ( hit_sound.getStatus() != 2 ) // 2 means Playing
+                hit_sound.play();
+            else
+                hit_sound_play_flag = false;
+        }
 
 
         window.clear( sf::Color::White );
