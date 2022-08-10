@@ -3,15 +3,17 @@
 
 #include <iostream>
 #include <utility>
-// #include <time> // for srand();
+#include <string>
 
 #include "main.hpp"
 
 #define WIDTH  800
 #define HEIGHT 700
 #define GROUND HEIGHT - 50
+#define HEALTH 10  // min: 0;
 
 #define bullets_size  10
+
 
 int main() {
 
@@ -45,9 +47,6 @@ int main() {
         // set velocity
         p->second = -1 * generate_randint( 1, 6 );
 
-        std::cout << p->first.getPosition().y << std::endl;
-
-
     }
 
 
@@ -66,10 +65,47 @@ int main() {
     hit_sound.setBuffer(hit_sound_buf);
 
 
+    sf::Font text_font;
+
+    text_font.loadFromFile("./resource/lemon_day.ttf");
+
+    sf::Text health_text;
+    
+    // select the font
+    health_text.setFont(text_font); // font is a sf::Font
+    
+    // set the string to display
+
+    int health = HEALTH;
+    std::string health_string = "Health: " + std::to_string(health);
+    health_text.setString(health_string);
+    
+    // set the character size
+    health_text.setCharacterSize(24); // in pixels, not points!
+    
+    // set the color
+    health_text.setFillColor(sf::Color::Black);
+
+    health_text.setPosition(350, 20);
+    
+    // set the text style
+    // text.setStyle(sf::Text::Bold | sf::Text::Underlined);
+    
+    
+    sf::RectangleShape restart_button(sf::Vector2f(100.f, 50.f));
+    restart_button.setPosition( WIDTH / 2 - 70 / 2, HEIGHT / 2 - 30 / 2 );
+    restart_button.setFillColor(sf::Color::Blue);
+
+    sf::Text restart_text("Restart", text_font);
+    restart_text.setPosition(WIDTH / 2 - 70 / 2 + 5, HEIGHT / 2 - 30 / 2 + 5);
+    restart_text.setCharacterSize(24);
+    restart_text.setFillColor(sf::Color::White);
+
+
+
     bool jump_flag = false;
     bool hit_sound_play_flag = false;
-
-
+    bool game_over = false;
 
     while (window.isOpen()) {
 
@@ -122,9 +158,15 @@ int main() {
         for ( bullet_pair * bullet = bullets ; bullet != bullets + 10 ; ++bullet ) {
 
             if ( bullet->first.getGlobalBounds().intersects(player.getGlobalBounds()) ) {
+
                 if ( !hit_sound_play_flag )
                     hit_sound_play_flag = true;
                 player.setOutlineColor(sf::Color::Blue);
+
+                if ( --health <= 0 ) { 
+                    game_over = true;
+                }
+                
             } 
         }
 
@@ -142,21 +184,52 @@ int main() {
         window.clear( sf::Color::White );
 
 
-        // draw bullets
+        if ( ! game_over ) {
+            // draw bullets
 
-        for ( bullet_pair * p = bullets ; p != bullets + bullets_size ; ++p ) {
-            window.draw( p->first );
-            p->first.move(p->second, 0.f);
+            for ( bullet_pair * p = bullets ; p != bullets + bullets_size ; ++p ) {
+
+                window.draw( p->first );
+                if ( p->first.getPosition().x <= 0 ||
+                    p->first.getGlobalBounds().intersects(player.getGlobalBounds()) ) {
+
+                    p->first.setPosition( 760, generate_randint( 0, GROUND ));
+                    p->second = -1 * generate_randint( 1, 6 );
+
+                }
+                p->first.move(p->second, 0.f);
+
+            }
+
+            // draw bullets
 
 
-        }
+            window.draw(player);
 
-        // draw bullets
+            health_text.setString( "Health: " + std::to_string(health)  );
 
+            window.draw(health_text);
+       } else {
 
-        window.draw(player);
+            window.draw(restart_button);
+            window.draw(restart_text);
 
+            if ( event.type == sf::Event::MouseButtonPressed ) {
+                if ( event.mouseButton.button == sf::Mouse::Left ) {
 
+                    if ( restart_button.getGlobalBounds().contains
+                            (event.mouseButton.x, event.mouseButton.y) ) {
+
+                        game_over = false;
+                        health = HEALTH;
+                        player.setPosition(100.f, GROUND - player.getSize().y);  
+                    }
+                
+                }
+            }
+                            
+
+       }
         
         window.display();
     }
