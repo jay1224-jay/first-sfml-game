@@ -7,6 +7,7 @@ typedef sf::RectangleShape rect;
 
 bool collision_detect( rect, rect);
 bool jump( rect& );
+int generate_randint(int , int );
 
 
 bool collision_detect( rect small_one , rect large_one ) {
@@ -45,7 +46,27 @@ bool collision_detect( rect small_one , rect large_one ) {
 
 
 double jump_equ_x = jump_equ_x_default;  // range: to -jump_equ_x_default;
+double origin_velocity = -20;
+double velocity = origin_velocity;
+double acceleration = 1;
 
+bool jump ( rect &obj ) {
+
+    obj.move(0.f, velocity);
+
+    velocity += acceleration;
+
+    if ( obj.getPosition().y >= 550 ) {
+
+        velocity = origin_velocity;
+        return false;
+    }
+
+    return true;
+}
+
+
+/*
 bool jump( rect& obj ) {
 
     if ( jump_equ_x < 0 )
@@ -64,7 +85,18 @@ bool jump( rect& obj ) {
     return true;
 
 }
-    
-    
+*/
+
+int generate_randint(int _begin, int _end) {
+
+
+    int r;  // range: 0 ~ (_end -1)
+
+    while ( (r = rand() % _end) < _begin  )
+        ;
+
+    return r;
+
+}   
 
 
