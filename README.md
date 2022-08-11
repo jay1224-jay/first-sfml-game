@@ -1,2 +1,2 @@
 game play video:
-![](game-play.mkv)
+![Alt Text](game-play.mkv)
